@@ -14,16 +14,16 @@ import com.pluralsight.service.RideService;
 
 @Controller
 public class RideController {
-
+	
 	@Autowired
 	private RideService rideService;
 	
 	@RequestMapping(value = "/rides", method = RequestMethod.GET)
 	public @ResponseBody List<Ride> getRides() {
 		return rideService.getRides();
-	}	
+	}
 	
-	@RequestMapping(value = "/rides", method = RequestMethod.PUT)
+	@RequestMapping(value = "/rides", method = RequestMethod.POST)
 	public @ResponseBody Ride putRides(@RequestBody Ride ride) {
 		return rideService.createRide(ride);
 	}

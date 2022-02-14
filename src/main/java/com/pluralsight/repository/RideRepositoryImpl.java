@@ -1,13 +1,15 @@
 package com.pluralsight.repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
+import org.pluralsight.util.RideRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.pluralsight.model.Ride;
@@ -20,32 +22,52 @@ public class RideRepositoryImpl implements RideRepository {
 
 	@Override
 	public List<Ride> getRides() {
-		Ride ride = new Ride();
-		ride.setName("Corner Canyon");
-		ride.setDuration(120);
-		List <Ride> rides = new ArrayList<>();
-		rides.add(ride);
+		List<Ride> rides = JdbcTemplate.query("SELECT * FROM ride", new RideRowMapper());
 		return rides;
 	}
 
 	@Override
 	public Ride createRide(Ride ride) {
 		
+		// a simpler way
 		// JdbcTemplate.update("insert into ride(name, duration) values(?,?)",ride.getName(),ride.getDuration());
-		SimpleJdbcInsert insert = new SimpleJdbcInsert(JdbcTemplate);
-		List<String> columns = new ArrayList<>();
-		columns.add("name"); columns.add("duration");
-		insert.setTableName("ride"); insert.setColumnNames(columns);
 		
-		Map<String, Object> data = new HashMap<>();
-		data.put("name", ride.getName());
-		data.put("duration", ride.getDuration());
+		// hard way
+		// SimpleJdbcInsert insert = new SimpleJdbcInsert(JdbcTemplate);
+		// List<String> columns = new ArrayList<>();
+		// columns.add("name"); columns.add("duration");
+		// insert.setTableName("ride"); insert.setColumnNames(columns);
+		//
+		// Map<String, Object> data = new HashMap<>();
+		// data.put("name", ride.getName());
+		// data.put("duration", ride.getDuration());
+		//
+		// insert.setGeneratedKeyName("id");
+		//
+		// Number key = insert.executeAndReturnKey(data); // Returns generated value from SQL server
+		// System.out.println(key);
+		// return ride;
 		
-		insert.setGeneratedKeyName("id");
+		// using keyHolder
+		GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+		JdbcTemplate.update(new PreparedStatementCreator() {
+			
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement("INSERT INTO ride(name, duration) VALUES(?,?)", new String[] {"id"});
+				ps.setString(1, ride.getName());
+				ps.setInt(2, ride.getDuration());
+				return ps;
+			}
+		}, keyHolder);
 		
-		Number key = insert.executeAndReturnKey(data); // Returns generated value from SQL server
-		System.out.println(key);
+		Number key = keyHolder.getKey();
 		
+		return getRide(key.intValue());
+	}
+
+	private Ride getRide(int id) {
+		Ride ride = JdbcTemplate.queryForObject("SELECT * FROM ride WHERE id = ?", new RideRowMapper(), id);
 		return ride;
 	}
 	
