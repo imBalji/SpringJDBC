@@ -66,9 +66,21 @@ public class RideRepositoryImpl implements RideRepository {
 		return getRide(key.intValue());
 	}
 
-	private Ride getRide(int id) {
+	@Override
+	public Ride getRide(int id) {
 		Ride ride = JdbcTemplate.queryForObject("SELECT * FROM ride WHERE id = ?", new RideRowMapper(), id);
 		return ride;
+	}
+
+	@Override
+	public Ride updateRide(Ride ride) {
+		JdbcTemplate.update("UPDATE ride SET name = ?, duration = ? WHERE id = ?", ride.getName(), ride.getDuration(), ride.getId());
+		return ride;
+	}
+
+	@Override
+	public void updateRides(List<Object[]> pairs) {
+		JdbcTemplate.batchUpdate("UPDATE ride SET date = ? WHERE id = ?", pairs);
 	}
 	
 }

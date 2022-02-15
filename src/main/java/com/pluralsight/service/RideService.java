@@ -10,4 +10,10 @@ public interface RideService {
 
 	Ride createRide(Ride ride);
 
+	Ride getRide(int id);
+
+	Ride updateRide(Ride ride);
+
+	void batch();
+
 }
