@@ -3,12 +3,15 @@ package com.pluralsight.repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.pluralsight.util.RideRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
@@ -81,6 +84,20 @@ public class RideRepositoryImpl implements RideRepository {
 	@Override
 	public void updateRides(List<Object[]> pairs) {
 		JdbcTemplate.batchUpdate("UPDATE ride SET date = ? WHERE id = ?", pairs);
+	}
+
+	@Override
+	public void deleteRide(int id) {
+		// the easy way
+		// JdbcTemplate.update("DELETE FROM ride WHERE id = ?",id);
+		
+		// With Named Parameter
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(JdbcTemplate);
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("id", id);
+		
+		namedParameterJdbcTemplate.update("DELETE FROM ride WHERE id = :id", paramMap);
 	}
 	
 }

@@ -40,6 +40,12 @@ public class RideController {
 		return null;
 	}
 	
+	@RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
+	public @ResponseBody Object deleteRide(@PathVariable(name = "id") int id) {
+		rideService.deleteRide(id);
+		return null;
+	}
+	
 	@RequestMapping(value = "/rides", method = RequestMethod.POST)
 	public @ResponseBody Ride putRides(@RequestBody Ride ride) {
 		return rideService.createRide(ride);
